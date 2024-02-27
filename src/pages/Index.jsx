@@ -2,28 +2,72 @@ import React, { useState } from "react";
 import { VStack, HStack, Box, Grid, useToast } from "@chakra-ui/react";
 
 const boardSize = 8;
-const initialBoard = () => {
-  const board = Array(boardSize)
-    .fill(null)
-    .map(() => Array(boardSize).fill(null));
+const directions = [
+  [-1, -1],
+  [-1, 0],
+  [-1, 1],
+  [0, -1],
+  [0, 1],
+  [1, -1],
+  [1, 0],
+  [1, 1],
+];
 
-  const midPoint = Math.floor(boardSize / 2);
-  board[midPoint - 1][midPoint - 1] = "W";
-  board[midPoint - 1][midPoint] = "B";
-  board[midPoint][midPoint - 1] = "B";
-  board[midPoint][midPoint] = "W";
-  return board;
+const initialBoard = () => {};
+
+const isValidMove = (board, row, col, player) => {
+  if (board[row][col] !== null) return false;
+
+  let valid = false;
+  directions.forEach(([dx, dy]) => {
+    let x = row + dx;
+    let y = col + dy;
+    let count = 0;
+
+    while (x >= 0 && x < boardSize && y >= 0 && y < boardSize && board[x][y] && board[x][y] !== player) {
+      x += dx;
+      y += dy;
+      count++;
+    }
+
+    if (count > 0 && x >= 0 && x < boardSize && y >= 0 && y < boardSize && board[x][y] === player) {
+      valid = true;
+    }
+  });
+
+  return valid;
+};
+
+const flipPieces = (newBoard, row, col, player) => {
+  directions.forEach(([dx, dy]) => {
+    let x = row + dx;
+    let y = col + dy;
+    let toFlip = [];
+
+    while (x >= 0 && x < boardSize && y >= 0 && y < boardSize && newBoard[x][y] && newBoard[x][y] !== player) {
+      toFlip.push([x, y]);
+      x += dx;
+      y += dy;
+    }
+
+    if (x >= 0 && x < boardSize && y >= 0 && y < boardSize && newBoard[x][y] === player) {
+      toFlip.forEach(([fx, fy]) => {
+        newBoard[fx][fy] = player;
+      });
+    }
+  });
 };
 
 const Index = () => {
-  const [board, setBoard] = useState(initialBoard());
   const toast = useToast();
+  const [board, setBoard] = useState(initialBoard());
+  const [currentPlayer, setCurrentPlayer] = useState("B");
 
   const placePiece = (row, col) => {
-    if (board[row][col] !== null) {
+    if (!isValidMove(board, row, col, currentPlayer)) {
       toast({
         title: "Invalid move",
-        description: "You can't place a piece here.",
+        description: "This move is not allowed.",
         status: "error",
         duration: 2000,
         isClosable: true,
@@ -31,26 +75,12 @@ const Index = () => {
       return;
     }
 
-    // For simplification, we'll alternate placing black (B) and white (W) pieces without any game logic
-    const newBoard = [...board];
-    const totalPieces = board.flat().filter((cell) => cell !== null).length;
-    newBoard[row][col] = totalPieces % 2 === 0 ? "B" : "W";
+    const newBoard = [...board.map((row) => [...row])];
+    newBoard[row][col] = currentPlayer;
+    flipPieces(newBoard, row, col, currentPlayer);
     setBoard(newBoard);
+    setCurrentPlayer(currentPlayer === "B" ? "W" : "B");
   };
-
-  const renderSquare = (piece, row, col) => <Box w="40px" h="40px" bg={piece ? (piece === "B" ? "black" : "white") : "green.300"} border="1px" borderColor="gray.500" onClick={() => placePiece(row, col)} />;
-
-  const renderBoard = () => (
-    <Grid templateColumns={`repeat(${boardSize}, 1fr)`} gap={1}>
-      {board.map((row, rowIndex) => row.map((piece, colIndex) => renderSquare(piece, rowIndex, colIndex)))}
-    </Grid>
-  );
-
-  return (
-    <VStack spacing={8} align="center" justify="center" height="100vh">
-      <HStack>{renderBoard()}</HStack>
-    </VStack>
-  );
 };
 
 export default Index;
