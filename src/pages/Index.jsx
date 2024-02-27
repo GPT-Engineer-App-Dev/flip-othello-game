@@ -2,10 +2,18 @@ import React, { useState } from "react";
 import { VStack, HStack, Box, Grid, useToast } from "@chakra-ui/react";
 
 const boardSize = 8;
-const initialBoard = () =>
-  Array(boardSize)
+const initialBoard = () => {
+  const board = Array(boardSize)
     .fill(null)
     .map(() => Array(boardSize).fill(null));
+
+  const midPoint = Math.floor(boardSize / 2);
+  board[midPoint - 1][midPoint - 1] = "W";
+  board[midPoint - 1][midPoint] = "B";
+  board[midPoint][midPoint - 1] = "B";
+  board[midPoint][midPoint] = "W";
+  return board;
+};
 
 const Index = () => {
   const [board, setBoard] = useState(initialBoard());
