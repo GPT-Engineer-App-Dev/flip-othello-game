@@ -38,7 +38,7 @@ const Index = () => {
     setBoard(newBoard);
   };
 
-  const renderSquare = (piece, row, col) => <Box w="40px" h="40px" bg={piece ? (piece === "B" ? "black" : "white") : "green.300"} border="1px" borderColor="gray.500" onClick={() => placePiece(row, col)} />;
+  const renderSquare = (piece, row, col) => <Box w="40px" h="40px" bg={piece ? (piece === "B" ? "black" : "white") : "green.700"} border="1px" borderColor="gray.500" onClick={() => placePiece(row, col)} />;
 
   const renderBoard = () => (
     <Grid templateColumns={`repeat(${boardSize}, 1fr)`} gap={1}>
